@@ -13,8 +13,6 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
-
-
 provider "aws" {
   region  = "us-west-2"
 }
@@ -44,8 +42,8 @@ provider "docker" {
 }
 
 
-resource "docker_container" "proy" {
-  image = docker_image.proyecto.latest
+resource "docker_container" "repo" {
+  image = docker_image.repo.latest
   name  = var.reponame
   ports {
     internal = 80
