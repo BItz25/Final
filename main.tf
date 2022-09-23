@@ -20,7 +20,7 @@ provider "aws" {
 }
 
 resource "aws_instance" "Final" {
-  ami           = "i-0f4d87c19b0565ca8"
+  ami           = "ami-05fa00d4c63e32376"
   instance_type = "t2.micro"
   security_groups= ["launch-wizard-1","default"]
   key_name= "brend"
