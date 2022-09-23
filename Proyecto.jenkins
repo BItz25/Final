@@ -116,7 +116,7 @@ pipeline {
         stage('run image') {
             steps {
                 
-                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bree-inventory.hosts', playbook: 'playbook-run.yml', extraVars: [ var_job_name: "${JOB_BASE_NAME}", var_build_number: "${BUILD_NUMBER}", var_docker_repo: "${env.DOCKER_REPO}",  var_container_port: "${CONTAINER_PORT}",var_ip: "${PUBLIC_IP_EC2}" ]
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-run.yml', extraVars: [ var_job_name: "${JOB_BASE_NAME}", var_build_number: "${BUILD_NUMBER}", var_docker_repo: "${env.DOCKER_REPO}",  var_container_port: "${CONTAINER_PORT}",var_ip: "${PUBLIC_IP_EC2}" ]
             }
         }
        stage('Manual Approval to Destroy the Infra') {
