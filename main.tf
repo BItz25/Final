@@ -16,17 +16,17 @@ terraform {
 
 
 provider "aws" {
-  region  = "us-west-2"
+  region  = "us-west-1"
 }
 
-resource "aws_instance" "proyecto" {
-  ami           = "ami-0d70546e43a941d70"
+resource "aws_instance" "Final" {
+  ami           = "ami-0f4d87c19b0565ca8"
   instance_type = "t2.micro"
   security_groups= ["launch-wizard-1","default"]
-  key_name= "josueriocampos"
+  key_name= "brend"
 
   tags = {
-    Name = "proyecto02"
+    Name = "proyect"
   }
 }
 output "instance_public_ip" {
