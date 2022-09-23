@@ -16,7 +16,7 @@ terraform {
 
 
 provider "aws" {
-  region  = "us-west-1a"
+  region  = "us-west-2"
 }
 
 resource "aws_instance" "Final" {
