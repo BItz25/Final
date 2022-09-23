@@ -126,7 +126,7 @@ pipeline {
         }
         stage('Executing Terraform Destroy') {
             steps{
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-bre', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]){
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-bren', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]){
                 sh "terraform destroy --auto-approve"
             }
             }
