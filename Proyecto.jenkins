@@ -1,1 +1,135 @@
-/*
+def genaralvars () {
+
+    env.GIT_REPO = 'https://github.com/BItz25/Final.git'
+    env.GIT_BRANCH = 'main'
+    env.DOCKER_REPO = 'brendacruz25'
+    CONTAINER_PORT= '81'
+
+}
+
+
+pipeline {
+    agent any
+    tools {
+       terraform 'terraform-2'
+    }
+    stages {
+        stage ("Set Variables") {
+            steps {
+                genaralvars()
+            }
+        }
+        
+        /*stage ("Verify If exist container") {
+            steps {
+                    script {
+                        DOCKERID = sh (script: "docker ps -f publish=${CONTAINER_PORT} -q", returnStdout: true).trim()
+                        if  ( DOCKERID !="" ) {
+                            if (fileExists('terraform.tfstate')) {
+                                sh "terraform destroy  -var=\"container_port=${CONTAINER_PORT}\" -var=\"reponame=${env.DOCKER_REPO}\" --target docker_container.nginx --auto-approve"
+                            }
+                            else {
+                                sh "docker stop ${DOCKERID}"
+                            }
+                        }
+                }
+            }
+        }*/
+        
+        stage('terraform format check') {
+            steps{
+                sh 'terraform fmt'
+            }
+        }
+        stage('terraform Init') {
+            steps{
+                sh 'terraform init -upgrade'
+            }
+        }
+        stage('terraform apply') {
+            steps{
+                //withAWS(credentials: 'aws-bren', region: 'us-east-1') {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-bren', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]){
+                   // sh "terraform apply -var=\"container_port=${CONTAINER_PORT}\" -var=\"reponame=${env.DOCKER_REPO}\" --auto-approve"
+                    sh "terraform apply --auto-approve"
+                }
+                script {
+                    PUBLIC_IP_EC2 = sh (script: "terraform output instance_public_ip", returnStdout:true).trim()
+                }
+                echo "${PUBLIC_IP_EC2}"
+            }
+        }
+
+        stage('Change inventory content') {
+            steps{
+                sh "echo $PUBLIC_IP_EC2 > bre-inventory.hosts"
+            }
+        }     
+        stage('Wait 30 seconds') {
+            steps {
+                sleep time:30, unit: 'SECONDS'
+            }
+        }
+       stage('Connect to Host and install Packages') {
+            steps {
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-install-packages.yml'
+            }
+        }
+        stage('Connect to Host and execute a command') {
+            steps {
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-execute-command-packages.yml'
+            }
+        }
+        stage('Connect to Host and install Docker') {
+            steps {
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bree-inventory.hosts', playbook: 'playbook-install-docker.yml'
+            }
+        }
+      
+        stage ("Create Dockerfile") {
+            steps {
+                sh '''
+                    cat <<EOT > Dockerfile
+                    FROM nginx:latest
+                    COPY index.html /usr/share/nginx/html/
+                '''
+            }
+        }
+        stage ("Build Image") {
+            steps {
+                sh "docker build -t ${env.DOCKER_REPO}/${JOB_BASE_NAME}:${BUILD_NUMBER} ."
+            }
+        }
+        stage ("Publish Image") {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'bren', passwordVariable: 'docker_pass', usernameVariable: 'docker_user')]) {
+                    sh "docker login -u $docker_user -p $docker_pass"
+                    sh "docker push ${env.DOCKER_REPO}/${JOB_BASE_NAME}:${BUILD_NUMBER}"
+                }
+            }
+        }
+        stage('pull image') {
+            steps {
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-pull.yml', extraVars: [ var_job_name: "${JOB_BASE_NAME}", var_build_number: "${BUILD_NUMBER}", var_docker_repo: "${env.DOCKER_REPO}",  var_container_port: "${CONTAINER_PORT}",var_ip: "${PUBLIC_IP_EC2}" ]
+            }
+        }
+        stage('run image') {
+            steps {
+                
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bree-inventory.hosts', playbook: 'playbook-run.yml', extraVars: [ var_job_name: "${JOB_BASE_NAME}", var_build_number: "${BUILD_NUMBER}", var_docker_repo: "${env.DOCKER_REPO}",  var_container_port: "${CONTAINER_PORT}",var_ip: "${PUBLIC_IP_EC2}" ]
+            }
+        }
+       stage('Manual Approval to Destroy the Infra') {
+            steps{
+                input "Proceed with destroy the Infra?"
+            }
+        }
+        stage('Executing Terraform Destroy') {
+            steps{
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-bre', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]){
+                sh "terraform destroy --auto-approve"
+            }
+            }
+        }
+    }
+}
