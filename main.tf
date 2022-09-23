@@ -16,22 +16,22 @@ terraform {
 
 
 provider "aws" {
-  region  = "us-west-1"
+  region  = "us-west-1a"
 }
 
 resource "aws_instance" "Final" {
-  ami           = "ami-0f4d87c19b0565ca8"
+  ami           = "i-0f4d87c19b0565ca8"
   instance_type = "t2.micro"
   security_groups= ["launch-wizard-1","default"]
   key_name= "brend"
 
   tags = {
-    Name = "proyect"
+    Name = "Final"
   }
 }
 output "instance_public_ip" {
   description = "Obtener la IP publica de mi instancia"
-  value = aws_instance.proyecto.public_ip  // aws_instance.$NOMBRE-RECURSO-TIPO-aws_instance$.public_ip
+  value = aws_instance.Final.public_ip  // aws_instance.$NOMBRE-RECURSO-TIPO-aws_instance$.public_ip
 }
 
 
