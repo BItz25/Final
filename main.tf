@@ -24,7 +24,7 @@ resource "aws_instance" "Final" {
   key_name= "brend"
 
   tags = {
-    Name = "Final"
+    Name = "Final02"
   }
 }
 output "instance_public_ip" {
@@ -42,8 +42,8 @@ provider "docker" {
 }
 
 
-resource "docker_container" "repo" {
-  image = docker_image.repo.latest
+resource "docker_container" "Final02" {
+  image = docker_image.Final.latest
   name  = var.reponame
   ports {
     internal = 80
