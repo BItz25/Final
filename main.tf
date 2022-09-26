@@ -4,10 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.32"
     }
-   /* docker = {
+    docker = {
       source  = "kreuzwerker/docker"
       version = "2.20.2"
-    }*/
+    }
   }
 
   required_version = ">= 1.2.0"
