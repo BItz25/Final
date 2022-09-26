@@ -32,8 +32,6 @@ output "instance_public_ip" {
   value = aws_instance.Final.public_ip  // aws_instance.$NOMBRE-RECURSO-TIPO-aws_instance$.public_ip
 }
 
-
-/*
 variable "reponame" {}
 variable "container_port" {}
 
@@ -50,6 +48,3 @@ resource "docker_container" "Final02" {
     external = var.container_port
   }
 }
-
-*/
-  
