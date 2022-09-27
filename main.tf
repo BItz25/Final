@@ -29,7 +29,7 @@ resource "aws_instance" "Final" {
 }
 output "instance_public_ip" {
   description = "Obtener la IP publica de mi instancia"
-  value = aws_instance.$Final.public_ip  //aws_instance.$NOMBRE-RECURSO-TIPO-aws_instance$.public_ip
+  value = aws_instance.Final.public_ip  //aws_instance.$NOMBRE-RECURSO-TIPO-aws_instance$.public_ip
 }
 
 /* variable "reponame" {}
@@ -40,7 +40,7 @@ provider "docker" {
 }
 
 
-resource "docker_container" "brendacruz25" {
+resource "docker_container" "Final02" {
   image = docker_image.Final.latest
   name  = var.reponame
   ports {
