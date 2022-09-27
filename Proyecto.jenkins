@@ -11,7 +11,7 @@ def genaralvars () {
 pipeline {
     agent any
     tools {
-       terraform 'terraform20803'
+       terraform 'terraform-2'
     }
     stages {
         stage ("Set Variables") {
