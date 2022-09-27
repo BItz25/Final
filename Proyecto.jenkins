@@ -20,7 +20,7 @@ pipeline {
             }
         }
         
-        /*stage ("Verify If exist container") {
+        /* stage ("Verify If exist container") {
             steps {
                     script {
                         DOCKERID = sh (script: "docker ps -f publish=${CONTAINER_PORT} -q", returnStdout: true).trim()
@@ -34,7 +34,7 @@ pipeline {
                         }
                 }
             }
-        }*/
+        } */
         
         stage('terraform format check') {
             steps{
@@ -48,10 +48,10 @@ pipeline {
         }
         stage('terraform apply') {
             steps{
-                //withAWS(credentials: 'aws-bren', region: 'us-east-2') {
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-bren', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]){
-                   // sh "terraform apply -var=\"container_port=${CONTAINER_PORT}\" -var=\"reponame=${env.DOCKER_REPO}\" --auto-approve"
-                    sh "terraform apply --auto-approve"
+                withAWS(credentials: 'aws-bren', region: 'us-east-1') {
+                //withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-bren', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]){
+                   sh "terraform apply -var=\"container_port=${CONTAINER_PORT}\" -var=\"reponame=${env.DOCKER_REPO}\" --auto-approve"
+                  // sh "terraform apply --auto-approve"
                 }
                 script {
                     PUBLIC_IP_EC2 = sh (script: "terraform output instance_public_ip", returnStdout:true).trim()
