@@ -72,17 +72,17 @@ pipeline {
         }
        stage('Connect to Host and install Packages') {
             steps {
-                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-install-packages.yml'
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'aws-bren', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-install-packages.yml'
             }
         }
         stage('Connect to Host and execute a command') {
             steps {
-                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-execute-command-packages.yml'
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'aws-bren', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-execute-command-packages.yml'
             }
         }
         stage('Connect to Host and install Docker') {
             steps {
-                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'priv-ssh-key', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-install-docker.yml'
+                ansiblePlaybook become: true, colorized: true, extras: '-v', disableHostKeyChecking: true, credentialsId: 'aws-bren', installation: 'ansible210', inventory: 'bre-inventory.hosts', playbook: 'playbook-install-docker.yml'
             }
         }
       
@@ -102,7 +102,7 @@ pipeline {
         }
         stage ("Publish Image") {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'bren', passwordVariable: 'docker_pass', usernameVariable: 'docker_user')]) {
+                withCredentials([usernamePassword(credentialsId: 'aws-bren', passwordVariable: 'docker_pass', usernameVariable: 'docker_user')]) {
                     sh "docker login -u $docker_user -p $docker_pass"
                     sh "docker push ${env.DOCKER_REPO}/${JOB_BASE_NAME}:${BUILD_NUMBER}"
                 }
